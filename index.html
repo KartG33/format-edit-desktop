@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0f1a">
+<title>Форматер текста</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Geologica:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:       #0b0f1a;
+  --s1:       #111827;
+  --s2:       #1a2235;
+  --s3:       #1e2d47;
+  --b1:       #1f3054;
+  --b2:       #2a4070;
+  --accent:   #3b82f6;
+  --accent-d: #2563eb;
+  --indigo:   #6366f1;
+  --text:     #c9d8f0;
+  --dim:      #6b8aad;
+  --muted:    #3d5475;
+  --green:    #22c55e;
+  --red:      #ef4444;
+  --yellow:   #f59e0b;
+  --sans:     'Geologica', sans-serif;
+  --mono:     'JetBrains Mono', monospace;
+  --left-w:   420px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background-image:
+    radial-gradient(ellipse 120% 40% at 50% 0%, rgba(59,130,246,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 30% at 100% 100%, rgba(99,102,241,0.06) 0%, transparent 50%);
+}
+
+button { cursor: pointer; }
+
+/* ── HEADER ─────────────────────────── */
+.hdr {
+  flex-shrink: 0;
+  background: var(--s1);
+  border-bottom: 1px solid var(--b1);
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--accent), var(--indigo));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 0 12px rgba(59,130,246,0.35);
+}
+
+.hdr-stats {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: 5px;
+  padding: 3px 10px;
+}
+.chip b { color: var(--dim); font-weight: 500; }
+
+.hdr-sep { flex: 1; }
+
+.install-btn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.4);
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background .15s;
+}
+.install-btn.visible { display: flex; }
+.install-btn:hover { background: rgba(59,130,246,0.25); }
+
+.file-hdr-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 7px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  color: var(--dim);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .04em;
+  transition: all .15s;
+}
+.file-hdr-btn:hover { background: var(--s3); color: var(--text); border-color: var(--b2); }
+
+/* ── MAIN LAYOUT ────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── LEFT COLUMN ────────────────────── */
+.left {
+  width: var(--left-w);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--s1);
+  border-right: 1px solid var(--b1);
+  overflow: hidden;
+}
+
+/* FORMAT SECTION */
+.fmt-section {
+  flex-shrink: 0;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--b1);
+}
+
+.section-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.fmt-cats {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.fmt-cat {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--b1);
+  background: var(--s2);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.fmt-cat.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.fmt-cat:hover:not(.active) {
+  background: var(--s3);
+  border-color: var(--b2);
+  color: var(--text);
+}
+
+/* FORMAT BUTTONS — 2×N grid */
+.fmt-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.f-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  color: var(--dim);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .12s;
+  min-height: 38px;
+  text-align: center;
+}
+.f-btn:hover {
+  background: var(--s3);
+  border-color: var(--b2);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.f-btn:active { transform: scale(.97); }
+
+/* DIVIDER */
+.col-divider {
+  height: 1px;
+  background: var(--b1);
+  flex-shrink: 0;
+}
+
+/* SYMBOLS SECTION */
+.sym-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 14px 16px;
+  gap: 10px;
+  min-height: 0;
+}
+
+.sym-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.sym-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--dim);
+}
+
+.sym-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: 10px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.sym-tab {
+  flex: 1;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 0;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .03em;
+}
+.sym-tab.active {
+  background: var(--s3);
+  border: 1px solid var(--b2);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.sym-tab:hover:not(.active) { color: var(--dim); }
+
+/* Symbol buttons — wrap freely, no height limit */
+.sym-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  overflow-y: auto;
+  align-content: flex-start;
+  scrollbar-width: thin;
+  scrollbar-color: var(--b2) transparent;
+  flex: 1;
+  min-height: 0;
+}
+.sym-scroll::-webkit-scrollbar { width: 4px; }
+.sym-scroll::-webkit-scrollbar-track { background: transparent; }
+.sym-scroll::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
+
+.s-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .12s;
+}
+.s-btn:hover { background: var(--s3); border-color: var(--accent); }
+.s-btn:active { transform: scale(.93); }
+.s-btn.gone {
+  text-decoration: line-through;
+  color: var(--muted);
+  border-color: var(--b1);
+  background: var(--s1);
+  opacity: .6;
+}
+.s-btn.gone:hover { border-color: rgba(34,197,94,.4); color: var(--green); opacity: 1; }
+.s-btn.emoji-btn { font-size: 16px; }
+
+.s-n {
+  font-size: 9px;
+  color: var(--muted);
+  background: var(--s3);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: var(--mono);
+}
+
+.sym-empty {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* REPLACE PANEL */
+.replace-panel {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+.replace-panel.active { display: flex; }
+
+.rp-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  width: 100%;
+  flex-shrink: 0;
+}
+.rp-field input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  width: 100%;
+  caret-color: var(--accent);
+}
+.rp-field input::placeholder { color: var(--muted); font-size: 12px; font-family: var(--sans); }
+.rp-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  white-space: nowrap;
+  width: 28px;
+  flex-shrink: 0;
+}
+.rp-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.rp-pair-hint {
+  font-size: 11px;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity .2s;
+  padding: 0 2px;
+}
+.rp-pair-hint.visible { opacity: 1; }
+.rp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 0;
+  border-radius: 10px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+  transition: all .12s;
+}
+.rp-btn:hover { background: var(--accent-d); }
+.rp-btn:active { transform: scale(.98); }
+.rp-btn.clear-btn {
+  background: transparent;
+  border: 1px solid var(--b2);
+  color: var(--dim);
+  flex: 0 0 44px;
+  font-size: 18px;
+}
+.rp-btn.clear-btn:hover { background: var(--s3); }
+
+/* ── RIGHT COLUMN ───────────────────── */
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.file-banner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(59,130,246,.1);
+  border-bottom: 1px solid rgba(59,130,246,.25);
+  font-size: 11px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.file-banner.active { display: flex; }
+.file-name { font-family: var(--mono); font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-close { cursor: pointer; opacity: .6; font-size: 16px; line-height: 1; transition: opacity .15s; }
+.file-close:hover { opacity: 1; }
+
+.editor-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  background: var(--s2);
+  color: var(--text);
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.8;
+  padding: 20px 24px;
+  caret-color: var(--accent);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--b2) transparent;
+}
+textarea::-webkit-scrollbar { width: 6px; }
+textarea::-webkit-scrollbar-track { background: transparent; }
+textarea::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 3px; }
+textarea::placeholder { color: var(--muted); font-family: var(--sans); font-size: 14px; }
+
+.diff-pill {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: rgba(11,15,26,.88);
+  border: 1px solid var(--b2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  pointer-events: none;
+  display: none;
+  backdrop-filter: blur(6px);
+  z-index: 5;
+}
+.diff-pill.pos { color: #4ade80; border-color: rgba(74,222,128,.3); }
+.diff-pill.neg { color: #f87171; border-color: rgba(248,113,113,.3); }
+
+/* ── BOTTOM BAR (under textarea) ────── */
+.btm {
+  flex-shrink: 0;
+  background: var(--s1);
+  border-top: 1px solid var(--b1);
+  padding: 8px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  box-shadow: 0 -10px 40px rgba(0,0,0,.35);
+}
+
+.b-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  color: var(--dim);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .12s;
+}
+.b-btn:hover { background: var(--s3); border-color: var(--b2); color: var(--text); }
+.b-btn:active { transform: scale(.96); }
+
+.b-btn.green  { color: #4ade80; border-color: rgba(74,222,128,.25); }
+.b-btn.green:hover  { background: rgba(34,197,94,.1); border-color: rgba(74,222,128,.5); }
+
+.b-btn.blue {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(59,130,246,.35);
+}
+.b-btn.blue:hover { background: var(--accent-d); box-shadow: 0 4px 20px rgba(59,130,246,.5); }
+
+.b-btn.red   { color: #f87171; border-color: rgba(239,68,68,.25); }
+.b-btn.red:hover   { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); }
+
+/* FILE MENU — dropdown style for desktop */
+.fm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+.fm-overlay.active { opacity: 1; pointer-events: auto; }
+
+.file-menu {
+  position: fixed;
+  top: 52px; right: 20px;
+  background: var(--s1);
+  border: 1px solid var(--b2);
+  border-radius: 14px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transform: translateY(-8px) scale(.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .2s cubic-bezier(.32,1.2,.64,1);
+  z-index: 50;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  min-width: 260px;
+}
+.file-menu.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+
+.fm-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s;
+  text-align: left;
+}
+.fm-btn:hover { background: var(--s2); border-color: var(--b1); }
+.fm-btn .fm-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.fm-btn .fm-sub { font-size: 10px; color: var(--dim); font-weight: 400; display: block; margin-top: 1px; }
+.fm-btn.open-f .fm-icon  { background: rgba(59,130,246,.2);  color: var(--accent); }
+.fm-btn.save-f .fm-icon  { background: rgba(34,197,94,.15);  color: var(--green); }
+.fm-btn.paste-f .fm-icon { background: rgba(245,158,11,.12); color: var(--yellow); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 30px; left: calc(var(--left-w) + 50%);
+  transform: translateX(-50%) translateY(20px);
+  background: var(--s3);
+  border: 1px solid var(--b2);
+  color: var(--text);
+  padding: 9px 20px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0;
+  transition: all .28s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-mark">✦</div>
+    Форматер
+  </div>
+
+  <div class="hdr-stats">
+    <div class="chip"><b id="sc">0</b> симв</div>
+    <div class="chip"><b id="sw">0</b> слов</div>
+  </div>
+
+  <div class="hdr-sep"></div>
+
+  <button class="install-btn" id="install-btn">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Установить
+  </button>
+
+  <button class="file-hdr-btn" onclick="openFileMenu()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Файл
+  </button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT COLUMN -->
+  <div class="left">
+
+    <!-- FORMAT SECTION -->
+    <div class="fmt-section">
+      <div class="section-label">Форматирование</div>
+      <div class="fmt-cats" id="fmt-cats">
+        <button class="fmt-cat active" onclick="setFmtCat('spaces',this)">Пробелы</button>
+        <button class="fmt-cat" onclick="setFmtCat('register',this)">Регистр</button>
+        <button class="fmt-cat" onclick="setFmtCat('punct',this)">Пунктуация</button>
+        <button class="fmt-cat" onclick="setFmtCat('struct',this)">Структура</button>
+      </div>
+      <div class="fmt-btns" id="fmt-btns"></div>
+    </div>
+
+    <div class="col-divider"></div>
+
+    <!-- SYMBOLS SECTION -->
+    <div class="sym-section">
+      <div class="sym-head">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Символы
+        <span class="sym-badge" id="sym-n">0</span>
+      </div>
+
+      <div class="sym-tabs">
+        <button class="sym-tab active" id="tab-detect" onclick="switchTab('detect')">Удалить</button>
+        <button class="sym-tab" id="tab-replace" onclick="switchTab('replace')">Заменить</button>
+      </div>
+
+      <!-- DETECT TAB -->
+      <div class="sym-scroll" id="sym-scroll">
+        <span class="sym-empty">Не найдено</span>
+      </div>
+
+      <!-- REPLACE TAB -->
+      <div class="replace-panel" id="replace-panel">
+        <div class="rp-field">
+          <span class="rp-label">что</span>
+          <input id="rp-from" type="text" placeholder="символ для замены" maxlength="10" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="rp-field">
+          <span class="rp-label">на</span>
+          <input id="rp-to" type="text" placeholder="чем заменить" maxlength="10" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="rp-pair-hint" id="rp-pair-hint"></div>
+        <div class="rp-row">
+          <button class="rp-btn" onclick="doReplace()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            Заменить
+          </button>
+          <button class="rp-btn clear-btn" onclick="clearReplace()" title="Очистить поля">✕</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT COLUMN -->
+  <div class="right">
+    <div class="file-banner" id="file-banner">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="file-name" id="file-name">—</span>
+      <span class="file-close" onclick="closeFile()">✕</span>
+    </div>
+
+    <div class="editor-wrap">
+      <textarea id="ed"
+        placeholder="Вставьте или введите текст…&#10;&#10;• Кнопки слева — форматирование&#10;• Найденные символы появятся в панели ниже&#10;• Снизу — работа с буфером обмена и файлами"
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off">
+      </textarea>
+      <div class="diff-pill" id="diff-pill"></div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="btm">
+      <button class="b-btn" onclick="doUndo()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.83-6.36L3 9"/></svg>
+        Назад
+      </button>
+      <button class="b-btn" onclick="doRedo()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-2.83-6.36L21 9"/></svg>
+        Вперёд
+      </button>
+      <button class="b-btn green" onclick="doPaste()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        Вставить
+      </button>
+      <button class="b-btn blue" onclick="doCopy()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Копировать
+      </button>
+      <button class="b-btn red" onclick="doClear()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Стереть
+      </button>
+    </div>
+  </div><!-- /right -->
+
+</div><!-- /main -->
+
+<!-- FILE MENU DROPDOWN -->
+<div class="fm-overlay" id="fm-overlay" onclick="closeFileMenu()"></div>
+<div class="file-menu" id="file-menu">
+  <button class="fm-btn open-f" onclick="openFile()">
+    <div class="fm-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div>
+      Открыть .txt файл
+      <span class="fm-sub">Загрузить текст из файла</span>
+    </div>
+  </button>
+  <button class="fm-btn save-f" onclick="saveFile()">
+    <div class="fm-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </div>
+    <div>
+      Сохранить как .txt
+      <span class="fm-sub">Скачать результат на компьютер</span>
+    </div>
+  </button>
+  <button class="fm-btn paste-f" onclick="doPaste()">
+    <div class="fm-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+    </div>
+    <div>
+      Вставить из буфера
+      <span class="fm-sub">Получить текст из clipboard</span>
+    </div>
+  </button>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="file-input" accept=".txt,text/plain" style="display:none">
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// SERVICE WORKER
+// ══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const ed = document.getElementById('ed');
+let history = [''], histIdx = 0;
+let removedSet = new Set();
+let currentFileName = null;
+let fileHandle = null;
+
+// ══════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════
+function saveHist(val) {
+  if (val === history[histIdx]) return;
+  history = history.slice(0, histIdx + 1);
+  history.push(val);
+  if (history.length > 100) history.shift();
+  histIdx = history.length - 1;
+}
+
+function setValue(val) {
+  const before = ed.value.length;
+  ed.value = val;
+  saveHist(val);
+  removedSet.clear();
+  render();
+  showDiff(val.length - before);
+}
+
+function showDiff(d) {
+  if (d === 0) return;
+  const pill = document.getElementById('diff-pill');
+  pill.textContent = (d > 0 ? '+' : '') + d;
+  pill.className = 'diff-pill ' + (d > 0 ? 'pos' : 'neg');
+  pill.style.display = 'block';
+  clearTimeout(pill._t);
+  pill._t = setTimeout(() => { pill.style.display = 'none'; }, 1800);
+}
+
+function doUndo() {
+  if (histIdx <= 0) { toast('Нечего отменять'); return; }
+  histIdx--;
+  ed.value = history[histIdx];
+  removedSet.clear();
+  render();
+}
+
+function doRedo() {
+  if (histIdx >= history.length - 1) { toast('Нечего повторять'); return; }
+  histIdx++;
+  ed.value = history[histIdx];
+  removedSet.clear();
+  render();
+}
+
+// ══════════════════════════════════════
+// STATS & RENDER
+// ══════════════════════════════════════
+function render() {
+  const txt = applyRemovals(ed.value);
+  document.getElementById('sc').textContent = txt.length;
+  document.getElementById('sw').textContent = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+  renderSymbols(txt);
+}
+
+function applyRemovals(txt) {
+  if (!removedSet.size) return txt;
+  let out = '';
+  for (const ch of txt) {
+    if (!removedSet.has(ch)) out += ch;
+  }
+  return out;
+}
+
+// ══════════════════════════════════════
+// SYMBOLS
+// ══════════════════════════════════════
+const IGNORE = new Set([
+  ...'\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u000B\u000C\u000E\u000F'
+  + '\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001A\u001B\u001C\u001D\u001E\u001F'
+].flatMap(c => [...c]),
+  ...' \t\n\r',
+  ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  ...'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ',
+  ...'0123456789'
+]);
+
+function isEmoji(str) {
+  return /\p{Emoji}/u.test(str) && !/[0-9#*]/u.test(str);
+}
+
+function renderSymbols(txt) {
+  const freq = {};
+  for (const ch of txt) {
+    if (!IGNORE.has(ch)) freq[ch] = (freq[ch] || 0) + 1;
+  }
+  const entries = Object.entries(freq).sort((a,b) => b[1]-a[1]);
+  document.getElementById('sym-n').textContent = entries.length;
+
+  const wrap = document.getElementById('sym-scroll');
+  if (!entries.length) {
+    wrap.innerHTML = '<span class="sym-empty">Не найдено</span>';
+    return;
+  }
+
+  wrap.innerHTML = '';
+  for (const [ch, cnt] of entries) {
+    const btn = document.createElement('button');
+    const gone = removedSet.has(ch);
+    btn.className = 's-btn' + (isEmoji(ch) ? ' emoji-btn' : '') + (gone ? ' gone' : '');
+    const label = ch === '\u00A0' ? '·' : ch === '\u200B' ? '​​∅' : ch;
+    btn.innerHTML = `${label}<span class="s-n">${cnt}</span>`;
+    btn.title = `U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')}`;
+    btn.onclick = () => toggleRemove(ch);
+    wrap.appendChild(btn);
+  }
+}
+
+function toggleRemove(ch) {
+  if (removedSet.has(ch)) removedSet.delete(ch);
+  else removedSet.add(ch);
+  render();
+}
+
+// ══════════════════════════════════════
+// TAB SWITCHER
+// ══════════════════════════════════════
+function switchTab(tab) {
+  const isDetect = tab === 'detect';
+  document.getElementById('tab-detect').classList.toggle('active', isDetect);
+  document.getElementById('tab-replace').classList.toggle('active', !isDetect);
+  document.getElementById('sym-scroll').style.display = isDetect ? '' : 'none';
+  document.getElementById('replace-panel').classList.toggle('active', !isDetect);
+}
+
+// ══════════════════════════════════════
+// REPLACE
+// ══════════════════════════════════════
+const PAIRS = {
+  '"': '"', '"': '"', '„': '"', '»': '«',
+  ''': "'", ''': "'", '—': '-', '–': '-',
+  '…': '...', '\u00A0': ' ', '\u200B': '',
+};
+
+document.getElementById('rp-from').addEventListener('input', () => {
+  const ch = document.getElementById('rp-from').value;
+  const hint = document.getElementById('rp-pair-hint');
+  if (PAIRS[ch]) {
+    hint.textContent = `→ авто: заменить на «${PAIRS[ch] || '∅'}»`;
+    hint.classList.add('visible');
+    document.getElementById('rp-to').value = PAIRS[ch];
+  } else {
+    hint.classList.remove('visible');
+  }
+});
+
+function doReplace() {
+  const from = document.getElementById('rp-from').value;
+  const to = document.getElementById('rp-to').value;
+  if (!from) { toast('Введите символ для замены'); return; }
+  const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const cnt = (ed.value.match(new RegExp(escaped, 'g')) || []).length;
+  if (!cnt) { toast('Символ не найден'); return; }
+  setValue(ed.value.replaceAll(from, to));
+  toast(`✓ Заменено ${cnt} вхождений`);
+}
+
+function clearReplace() {
+  document.getElementById('rp-from').value = '';
+  document.getElementById('rp-to').value = '';
+  document.getElementById('rp-pair-hint').classList.remove('visible');
+}
+
+// ══════════════════════════════════════
+// FORMAT
+// ══════════════════════════════════════
+let currentFmtCat = 'spaces';
+
+const FMT_CATS = {
+  spaces:   [
+    { label: '×2 пробелы',     fn: 'fmt_spaces' },
+    { label: 'Лишние строки',  fn: 'fmt_lines' },
+    { label: 'Обрезать края',  fn: 'fmt_trim' },
+    { label: 'Неразрывные →',  fn: 'fmt_nbsp' },
+  ],
+  register: [
+    { label: 'ВЕРХНИЙ',        fn: 'fmt_upper' },
+    { label: 'нижний',         fn: 'fmt_lower' },
+    { label: 'Аа Каждое',      fn: 'fmt_title' },
+    { label: 'Аа Предложения', fn: 'fmt_sentence' },
+  ],
+  punct: [
+    { label: 'Пробел до знака',  fn: 'fmt_space_before' },
+    { label: 'Пробел после',     fn: 'fmt_space_after' },
+  ],
+  struct: [
+    { label: 'В одну строку',    fn: 'fmt_oneline' },
+    { label: 'Предл. в строки',  fn: 'fmt_sentlines' },
+    { label: 'Убрать нумерац.',  fn: 'fmt_denumber' },
+  ],
+};
+
+function setFmtCat(cat, btn) {
+  currentFmtCat = cat;
+  document.querySelectorAll('.fmt-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFmtBtns();
+}
+
+function renderFmtBtns() {
+  const wrap = document.getElementById('fmt-btns');
+  wrap.innerHTML = '';
+  FMT_CATS[currentFmtCat].forEach(({ label, fn }) => {
+    const b = document.createElement('button');
+    b.className = 'f-btn';
+    b.textContent = label;
+    b.onclick = () => window[fn]();
+    wrap.appendChild(b);
+  });
+}
+
+function fmt_spaces()  { setValue(ed.value.replace(/[ \t]{2,}/g, ' ')); toast('Двойные пробелы убраны'); }
+function fmt_lines()   { setValue(ed.value.replace(/\n{3,}/g, '\n\n')); toast('Лишние строки удалены'); }
+function fmt_trim()    { setValue(ed.value.split('\n').map(l => l.trim()).join('\n')); toast('Края строк обрезаны'); }
+function fmt_upper()   { setValue(ed.value.toUpperCase()); toast('Текст — ВЕРХНИЙ регистр'); }
+function fmt_lower()   { setValue(ed.value.toLowerCase()); toast('Текст — нижний регистр'); }
+function fmt_title()   { setValue(ed.value.replace(/\S+/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase())); toast('Аа — каждое слово с заглавной'); }
+function fmt_sentence() {
+  const t = ed.value.toLowerCase().replace(/(^|[.!?]\s+)([а-яёa-z])/giu, (_, pre, ch) => pre + ch.toUpperCase());
+  setValue(t);
+  toast('Аа — заглавная в начале предложений');
+}
+function fmt_space_before() { setValue(ed.value.replace(/\s+([,\.!?:;])/g, '$1')); toast('Пробелы перед знаками убраны'); }
+function fmt_space_after()  { setValue(ed.value.replace(/([,\.!?:;])([^\s\n\d"'»)\]\}])/g, '$1 $2')); toast('Пробелы после знаков добавлены'); }
+function fmt_nbsp() {
+  const before = ed.value;
+  const after = before.replace(/\u00A0/g, ' ');
+  const cnt = (before.match(/\u00A0/g) || []).length;
+  setValue(after);
+  toast(cnt > 0 ? `Заменено ${cnt} неразрывных пробелов` : 'Неразрывных пробелов не найдено');
+}
+function fmt_oneline()    { setValue(ed.value.replace(/\n+/g, ' ').replace(/\s{2,}/g, ' ').trim()); toast('Текст собран в одну строку'); }
+function fmt_sentlines()  { setValue(ed.value.replace(/([.!?])\s+/g, '$1\n').trim()); toast('Каждое предложение на новой строке'); }
+function fmt_denumber()   { setValue(ed.value.replace(/^\s*\d+[\.\)]\s*/gm, '')); toast('Нумерация строк удалена'); }
+
+// ══════════════════════════════════════
+// CLIPBOARD
+// ══════════════════════════════════════
+async function doPaste() {
+  closeFileMenu();
+  if (navigator.clipboard && location.protocol === 'https:') {
+    try {
+      const text = await navigator.clipboard.readText();
+      setValue(text);
+      toast(`✓ Вставлено ${text.length} симв.`);
+      return;
+    } catch {}
+  }
+  ed.focus();
+  toast('Нажмите Ctrl+V в поле редактора');
+}
+
+async function doCopy() {
+  const text = ed.value;
+  if (!text.trim()) { toast('Нечего копировать'); return; }
+  if (navigator.clipboard && location.protocol === 'https:') {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(`✓ Скопировано ${text.length} симв.`);
+      return;
+    } catch {}
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) { toast(`✓ Скопировано ${text.length} симв.`); return; }
+  } catch {}
+  ed.focus(); ed.select();
+  toast('Выделено — нажмите Ctrl+C');
+}
+
+function doClear() {
+  if (!ed.value) return;
+  setValue('');
+  currentFileName = null;
+  fileHandle = null;
+  document.getElementById('file-banner').classList.remove('active');
+  toast('Поле очищено');
+}
+
+// ══════════════════════════════════════
+// FILE OPERATIONS
+// ══════════════════════════════════════
+async function openFile() {
+  closeFileMenu();
+  if ('showOpenFilePicker' in window) {
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{ description: 'Текстовые файлы', accept: { 'text/plain': ['.txt'] } }]
+      });
+      fileHandle = handle;
+      const file = await handle.getFile();
+      const text = await file.text();
+      currentFileName = file.name;
+      setValue(text);
+      showFileBanner(file.name);
+      toast(`✓ Открыт: ${file.name}`);
+      return;
+    } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  document.getElementById('file-input').click();
+}
+
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  currentFileName = file.name;
+  fileHandle = null;
+  setValue(text);
+  showFileBanner(file.name);
+  toast(`✓ Открыт: ${file.name}`);
+  e.target.value = '';
+});
+
+async function saveFile() {
+  closeFileMenu();
+  const text = applyRemovals(ed.value);
+  if (!text.trim()) { toast('Нечего сохранять'); return; }
+  const fname = currentFileName || 'форматированный.txt';
+  if ('showSaveFilePicker' in window) {
+    try {
+      const handle = fileHandle || await window.showSaveFilePicker({
+        suggestedName: fname,
+        types: [{ description: 'Текстовый файл', accept: { 'text/plain': ['.txt'] } }]
+      });
+      fileHandle = handle;
+      const writable = await handle.createWritable();
+      await writable.write(text);
+      await writable.close();
+      currentFileName = handle.name;
+      showFileBanner(handle.name);
+      toast(`✓ Сохранено: ${handle.name}`);
+      return;
+    } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fname; a.click();
+  URL.revokeObjectURL(url);
+  toast(`✓ Скачан: ${fname}`);
+}
+
+function showFileBanner(name) {
+  document.getElementById('file-name').textContent = name;
+  document.getElementById('file-banner').classList.add('active');
+}
+
+function closeFile() {
+  currentFileName = null;
+  fileHandle = null;
+  document.getElementById('file-banner').classList.remove('active');
+}
+
+// ══════════════════════════════════════
+// FILE MENU
+// ══════════════════════════════════════
+function openFileMenu() {
+  document.getElementById('file-menu').classList.add('open');
+  document.getElementById('fm-overlay').classList.add('active');
+}
+function closeFileMenu() {
+  document.getElementById('file-menu').classList.remove('open');
+  document.getElementById('fm-overlay').classList.remove('active');
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════
+// PWA INSTALL
+// ══════════════════════════════════════
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').classList.add('visible');
+});
+
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    document.getElementById('install-btn').classList.remove('visible');
+    toast('✓ Приложение установлено!');
+  }
+  deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-btn').classList.remove('visible');
+});
+
+// ══════════════════════════════════════
+// EDITOR EVENTS
+// ══════════════════════════════════════
+let edTimer;
+ed.addEventListener('input', () => {
+  clearTimeout(edTimer);
+  edTimer = setTimeout(() => {
+    saveHist(ed.value);
+    removedSet.clear();
+    render();
+  }, 350);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); doUndo(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); doRedo(); }
+});
+
+// Init
+ed.value = '';
+renderFmtBtns();
+render();
+</script>
+</body>
+</html>
